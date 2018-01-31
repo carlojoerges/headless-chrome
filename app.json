@@ -1,0 +1,14 @@
+{
+    "name": "headless-chrome",
+    "description": "A simple service that returns a pdf for a given URL",
+    "repository": "https://github.com/carlojoerges/headless-chrome",
+    "keywords": ["node", "express", "puppeteer"],
+    "buildpacks": [
+        {
+          "url": "https://github.com/jontewks/puppeteer-heroku-buildpack"
+        },
+        {
+          "url": "heroku/nodejs"
+        }
+    ]
+  }

@@ -3,6 +3,9 @@ const app = express();
 const puppeteer = require('puppeteer');
 const port = process.env.PORT || 8080;
 const validUrl = require('valid-url');
+const async = require('asyncawait/async');
+const await = require('asyncawait/await');
+
 
 var parseUrl = function(url) {
     url = decodeURIComponent(url)
@@ -18,21 +21,28 @@ app.get('/', function(req, res) {
 
     if (validUrl.isWebUri(urlToScreenshot)) {
         console.log('Screenshotting: ' + urlToScreenshot);
-        (async() => {
-            const browser = await puppeteer.launch({
+        const f = async(() => {
+            const browser = await(puppeteer.launch({
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
+            }));
+
+            const page = await(browser.newPage());
+
+            process.on("unhandledRejection", (reason, p) => {
+                browser.close();
             });
 
-            const page = await browser.newPage();
-            await page.goto(urlToScreenshot);
-            await page.screenshot().then(function(buffer) {
-                res.setHeader('Content-Disposition', 'attachment;filename="' + urlToScreenshot + '.png"');
-                res.setHeader('Content-Type', 'image/png');
+            await(page.goto(urlToScreenshot));
+            const title = await(page.title()).replace(/[^a-zA-Z0-9-_]/g, ' ').replace(/\s\s+/g, ' ');
+            await(page.pdf().then(function(buffer) {
+                res.setHeader('Content-Disposition', 'attachment;filename="' + title + '.pdf"');
+                res.setHeader('Content-Type', 'application/pdf');
                 res.send(buffer)
-            });
-
-            await browser.close();
-        })();
+            }));
+            await(page.close());
+            await(browser.close());
+        });
+        f();
     } else {
         res.send('Invalid url: ' + urlToScreenshot);
     }
